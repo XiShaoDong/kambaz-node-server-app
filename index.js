@@ -11,6 +11,7 @@ import session from "express-session";
 import ModulesRoutes from './Kambaz/Modules/routes.js';
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import AssignmentsRoutes from './Kambaz/Assignments/routes.js';
+import EnrollmentsRoutes from './Kambaz/Enrollments/router.js';
 
 
 const app = express();
@@ -34,8 +35,6 @@ if (process.env.SERVER_ENV !== "development") {
   };
 }
 app.use(session(sessionOptions));
-
-// app.use(cors())
 app.use(express.json());
 
 //Kamza
@@ -43,6 +42,7 @@ UserRoutes(app, db);
 CourseRoutes(app, db);
 ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
+EnrollmentsRoutes(app, db);
 
 Lab5(app)
 Hello(app)
