@@ -4,7 +4,7 @@ export default function AssignmentsRoutes(app, db) {
     const dao = AssignmentsDao(db);
     const findAllAssignments = (req, res) => {
         const assignments = dao.findAllAssignments();
-        res.send(assignments);
+        res.json(assignments);
     }
 
     const findAssignmentsForCurrentCourse = (req, res) => {
@@ -17,13 +17,13 @@ export default function AssignmentsRoutes(app, db) {
         const { courseId } = req.params;
         const assignment = req.body;
         const newAssignment = dao.createAssignments(assignment, courseId);
-        res.send(newAssignment)
+        res.json(newAssignment)
     }
 
     const deleteAssignments = (req, res) => {
         const { assignmentId} = req.params;
         const status = dao.deleteAssignments(assignmentId);
-        res.send(status);
+        res.sendStatus(status);
 
     }
 
@@ -31,7 +31,7 @@ export default function AssignmentsRoutes(app, db) {
         const { assignmentId } = req.params;
         const assignmentUpdates = req.body;
         const status = dao.updateAssignments(assignmentId, assignmentUpdates);
-        res.send(status);
+        res.sendStatus(status);
     }
 
     app.put("/api/assignments/:assignmentId", updateAssignments);

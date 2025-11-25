@@ -11,17 +11,17 @@ export default function AssignmentsDao(db) {
 
     function deleteAssignments(assignmentId){
         const {assignments} = db;
-        // need match both courseId and assignmentId
+        //@Check need match both courseId and assignmentId
         db.assignments = assignments.filter((a) => (a._id !== assignmentId));
 
      }
 
     function updateAssignments(assignmentId, assignmentUpdates){
         const {assignments} = db;
-        const assignment =assignments.find ((a) => a._id === assignmentId);
-        Object.assign(assignment, assignmentUpdates);
+        const updatedAssignment = assignments.find ((a) => a._id === assignmentId);
+        Object.assign(updatedAssignment, assignmentUpdates);
         console.log("@Dao updateAssignment",assignmentUpdates)
-        return assignment;
+        return updatedAssignment;
 
     }
 
@@ -31,8 +31,8 @@ export default function AssignmentsDao(db) {
 
     function findAssignmentsForCurrentCourse(courseId){
         const {assignments} = db;
-        const assignment = assignments.filter((a) => a.course === courseId);
-        return assignment
+        const assignmentsBelongCurrentCouse = assignments.filter((a) => a.course === courseId);
+        return assignmentsBelongCurrentCouse
     }
 
     return {
