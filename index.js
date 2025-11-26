@@ -17,22 +17,37 @@ import QuizzesRoutes from './Kambaz/Quizzes/routes.js';
 //Mongos
 import mongoose from 'mongoose';
 
+import MongoStore from "connect-mongo";
+
 const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
 mongoose.connect(CONNECTION_STRING);
 
 
 const app = express();
 app.use(
-    cors({
-        credentials: true,
-        origin: process.env.CLIENT_URL || "http://localhost:3000",
-    })
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+  })
 );
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+
+  // store session in mongoDB
+  store: MongoStore.create({
+    mongoUrl: CONNECTION_STRING,
+    collectionName: "sessions",   // colleciton name: session 
+    ttl: 24 * 60 * 60,           // 1 day expired
+    autoRemove: "native",         // auto clean session
+  }),
+
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 1 天
+  }
 };
+
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
