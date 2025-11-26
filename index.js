@@ -44,17 +44,21 @@ const sessionOptions = {
   }),
 
   cookie: {
-    maxAge: 24 * 60 * 60 * 1000, // 1 天
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    httpOnly: true,
   }
 };
 
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
-  sessionOptions.cookie = {
-    sameSite: "none",
-    secure: true,
-    domain: process.env.SERVER_URL,
-  };
+  sessionOptions.cookie.sameSite = "none"; 
+  sessionOptions.cookie.secure = true;
+  // sessionOptions.cookie = {
+  //   ...sessionOptions.cookie,
+  //   sameSite: "none",
+  //   secure: true,
+  //   domain: process.env.SERVER_URL,
+  // };
 }
 app.use(session(sessionOptions));
 app.use(express.json());
