@@ -1,43 +1,124 @@
-import {v4 as uuidv4} from "uuid"
-export default function QuizzesDao(db) {
+import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-    function createQuizzes(quiz, courseId){
-        const newQ ={...quiz, _id:uuidv4(), courseId};
-        db.quizzes = [...db.quizzes, newQ];
-        console.log("@QDao create Q", newQ);
+export default function QuizzesDao() {
 
-        return newQ;
-    }
+    // Create a new quiz
+    const createQuiz = (quiz, courseId) => {
+        const newQuiz = {
+            ...quiz,
+            _id: uuidv4(),
+            course: courseId,
+            questions: [] // Initialize with empty questions array
+        };
+        return model.create(newQuiz);
+    };
 
-    function deleteQuizzes(quizId){
-        const {quizzes} = db;
+    // Delete a quiz
+    const deleteQuiz = (quizId) => model.deleteOne({ _id: quizId });
 
-        db.quizzes = quizzes.filter((q) => q._id !== quizId);
+    // Update quiz (including questions)
+    const updateQuiz = (quizId, quizUpdates) => {
+        return model.updateOne(
+            { _id: quizId },
+            { $set: quizUpdates }
+        );
+    };
 
-    }
+    // Find all quizzes (for testing)
+    const findAllQuizzes = () => model.find();
 
-    function updateQuizzes(quizId, quizUpdates){
-        const {quizzes} = db;
-        const updatedQuiz = quizzes.find((q)=>q._id === quizId);
-        Object.assign(updatedQuiz, quizUpdates);
-        console.log("@Dao update Q",  
-            `updatedQuiz: ${updatedQuiz}`, 
-            `quizUpdates: ${quizUpdates}`);
-        return updatedQuiz;
-    }
+    // Find quizzes for a specific course
+    const findQuizzesForCourse = (courseId) => {
+        return model.find({ course: courseId });
+    };
 
-    function findQuizesForCurrentCourse(courseId){
-        const {quizzes} = db;
-        const quizzesBelongCurrentCourse = quizzes.filter((q) => q.course === courseId);
+    // Find a single quiz by ID
+    const findQuizById = (quizId) => model.findOne({ _id: quizId });
 
-        return quizzesBelongCurrentCourse;
-    }
+    // Publish/Unpublish quiz
+    const togglePublishQuiz = async (quizId) => {
+        const quiz = await model.findOne({ _id: quizId });
+        if (!quiz) return null;
+
+        quiz.published = !quiz.published;
+        await quiz.save();
+        return quiz;
+    };
+
+    // Add a question to quiz
+    const addQuestion = async (quizId, question) => {
+        const newQuestion = {
+            ...question,
+            _id: uuidv4(),
+            // choices add _id（if multipleChoice）
+            choices: question.type === "multipleChoice"
+                ? (question.choices?.map(c => ({
+                    ...c,
+                    _id: c._id || uuidv4()
+                })) || [])
+                : undefined,
+            possibleAnswers: question.possibleAnswers || [],
+            correctAnswer: question.correctAnswer,
+            caseSensitive: question.caseSensitive || false
+        };
+
+        const result = await model.updateOne(
+            { _id: quizId },
+            { $push: { questions: newQuestion } }
+        );
+        return newQuestion;
+    };
+
+    // Update a question in quiz
+    const updateQuestion = async (quizId, questionId, questionUpdates) => {
+        if (questionUpdates.choices) {
+            questionUpdates.choices = questionUpdates.choices.map(c => ({
+                ...c,
+                _id: c._id || uuidv4()
+            }));
+        }
+
+        const result = await model.updateOne(
+            { _id: quizId, "questions._id": questionId },
+            { $set: { "questions.$": { ...questionUpdates, _id: questionId } } }
+        );
+        return result;
+    };
+
+    // Delete a question from quiz
+    const deleteQuestion = async (quizId, questionId) => {
+        const result = await model.updateOne(
+            { _id: quizId },
+            { $pull: { questions: { _id: questionId } } }
+        );
+        return result;
+    };
+
+    // Update quiz points (sum of all question points)
+    const updateQuizPoints = async (quizId) => {
+        const quiz = await model.findOne({ _id: quizId });
+        if (!quiz) return null;
+
+        const totalPoints = quiz.questions.reduce((sum, q) => sum + (q.points || 0), 0);
+        await model.updateOne(
+            { _id: quizId },
+            { $set: { points: totalPoints } }
+        );
+        return totalPoints;
+    };
 
     return {
-        createQuizzes,
-        deleteQuizzes,
-        updateQuizzes,
-        findQuizesForCurrentCourse,
-    }
-
+        createQuiz,
+        deleteQuiz,
+        updateQuiz,
+        findAllQuizzes,
+        findQuizzesForCourse,
+        findQuizById,
+        togglePublishQuiz,
+        addQuestion,
+        updateQuestion,
+        deleteQuestion,
+        updateQuizPoints
+    };
 }

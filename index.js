@@ -13,7 +13,7 @@ import CourseRoutes from "./Kambaz/Courses/routes.js";
 import AssignmentsRoutes from './Kambaz/Assignments/routes.js';
 import EnrollmentsRoutes from './Kambaz/Enrollments/router.js';
 import QuizzesRoutes from './Kambaz/Quizzes/routes.js';
-
+import QuizAttemptsRoutes from './Kambaz/QuizAttempts/router.js';
 //Mongos
 import mongoose from 'mongoose';
 
@@ -70,6 +70,7 @@ ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
 EnrollmentsRoutes(app, db);
 QuizzesRoutes(app, db);
+QuizAttemptsRoutes(app)
 
 Lab5(app)
 Hello(app)
