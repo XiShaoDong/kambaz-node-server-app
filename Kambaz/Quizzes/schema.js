@@ -22,7 +22,14 @@ const questionSchema = new mongoose.Schema({
     // True/False field
     correctAnswer: { type: Boolean },
 
-    // Fill in Blank fields
+    // Fill in Blank fields - NEW STRUCTURE
+    blanks: [{
+        id: { type: String, required: true }, // e.g., "blank0", "blank1"
+        possibleAnswers: [{ type: String }],
+        caseSensitive: { type: Boolean, default: false }
+    }],
+    
+    // DEPRECATED - Keep for backward compatibility with old fillInBlank questions
     possibleAnswers: [{ type: String }],
     caseSensitive: { type: Boolean, default: false }
 });

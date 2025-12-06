@@ -51,13 +51,18 @@ export default function QuizzesDao() {
         const newQuestion = {
             ...question,
             _id: uuidv4(),
-            // choices add _id（if multipleChoice）
+            // Multiple Choice: add _id to choices
             choices: question.type === "multipleChoice"
                 ? (question.choices?.map(c => ({
                     ...c,
                     _id: c._id || uuidv4()
                 })) || [])
                 : undefined,
+            // Fill in Blank: handle both new (blanks) and old (possibleAnswers) structure
+            blanks: question.type === "fillInBlank" && question.blanks
+                ? question.blanks
+                : undefined,
+            // Keep for backward compatibility with old fillInBlank questions
             possibleAnswers: question.possibleAnswers || [],
             correctAnswer: question.correctAnswer,
             caseSensitive: question.caseSensitive || false
@@ -72,12 +77,16 @@ export default function QuizzesDao() {
 
     // Update a question in quiz
     const updateQuestion = async (quizId, questionId, questionUpdates) => {
+        // Handle Multiple Choice choices
         if (questionUpdates.choices) {
             questionUpdates.choices = questionUpdates.choices.map(c => ({
                 ...c,
                 _id: c._id || uuidv4()
             }));
         }
+
+        // Handle Fill in Blank blanks (new structure)
+        // No special processing needed for blanks array, it will be saved as-is
 
         const result = await model.updateOne(
             { _id: quizId, "questions._id": questionId },

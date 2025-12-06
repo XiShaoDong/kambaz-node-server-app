@@ -63,14 +63,32 @@ export default function QuizAttemptsRoutes(app) {
                     isCorrect = answer.answer === question.correctAnswer;
                     pointsEarned = isCorrect ? question.points : 0;
                 } else if (question.type === "fillInBlank") {
-                    const studentAnswer = question.caseSensitive 
-                        ? answer.answer 
-                        : answer.answer?.toLowerCase();
-                    const possibleAnswers = question.caseSensitive
-                        ? question.possibleAnswers
-                        : question.possibleAnswers.map(a => a.toLowerCase());
-                    isCorrect = possibleAnswers.includes(studentAnswer);
-                    pointsEarned = isCorrect ? question.points : 0;
+                    if (question.blanks && question.blanks.length > 0) {
+                        // Check if all blanks are correct
+                        isCorrect = question.blanks.every(blank => {
+                            const userAnswer = answer.answer?.[blank.id] || "";
+                            const normalizedUserAnswer = blank.caseSensitive 
+                                ? userAnswer 
+                                : userAnswer.toLowerCase();
+                            
+                            const possibleAnswers = blank.caseSensitive
+                                ? blank.possibleAnswers
+                                : blank.possibleAnswers.map(a => a.toLowerCase());
+                            
+                            return possibleAnswers.includes(normalizedUserAnswer);
+                        });
+                        pointsEarned = isCorrect ? question.points : 0;
+                    } 
+                    else {
+                        const studentAnswer = question.caseSensitive 
+                            ? answer.answer 
+                            : answer.answer?.toLowerCase();
+                        const possibleAnswers = question.caseSensitive
+                            ? question.possibleAnswers
+                            : question.possibleAnswers.map(a => a.toLowerCase());
+                        isCorrect = possibleAnswers.includes(studentAnswer);
+                        pointsEarned = isCorrect ? question.points : 0;
+                    }
                 }
 
                 totalScore += pointsEarned;
