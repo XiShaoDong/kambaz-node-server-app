@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit",
+    "test:watch": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "lint": "eslint .",
     "start": "node index.js"
   },
   "author": "",
@@ -20,5 +22,15 @@
     "express-session": "^1.18.2",
     "mongoose": "^9.0.0",
     "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.4",
+    "globals": "^17.7.0",
+    "jest": "^30.4.2",
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2",
+    "tslib": "^2.8.1"
   }
 }

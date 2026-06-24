@@ -68,7 +68,7 @@ export default function QuizzesDao() {
             caseSensitive: question.caseSensitive || false
         };
 
-        const result = await model.updateOne(
+        const _result = await model.updateOne(
             { _id: quizId },
             { $push: { questions: newQuestion } }
         );
@@ -88,20 +88,20 @@ export default function QuizzesDao() {
         // Handle Fill in Blank blanks (new structure)
         // No special processing needed for blanks array, it will be saved as-is
 
-        const result = await model.updateOne(
+        const _result = await model.updateOne(
             { _id: quizId, "questions._id": questionId },
             { $set: { "questions.$": { ...questionUpdates, _id: questionId } } }
         );
-        return result;
+        return _result;
     };
 
     // Delete a question from quiz
     const deleteQuestion = async (quizId, questionId) => {
-        const result = await model.updateOne(
+        const _result = await model.updateOne(
             { _id: quizId },
             { $pull: { questions: { _id: questionId } } }
         );
-        return result;
+        return _result;
     };
 
     // Update quiz points (sum of all question points)

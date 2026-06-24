@@ -1,77 +1,8 @@
-import express from 'express';
-import Hello from "./Hello.js"
-import Lab5 from "./Lab5/index.js";
-import cors from "cors"
-
-// For Kambaz
-import db from "./Kambaz/Database/index.js";
-import UserRoutes from "./Kambaz/Users/routes.js";
 import "dotenv/config";
-import session from "express-session";
-import ModulesRoutes from './Kambaz/Modules/routes.js';
-import CourseRoutes from "./Kambaz/Courses/routes.js";
-import AssignmentsRoutes from './Kambaz/Assignments/routes.js';
-import EnrollmentsRoutes from './Kambaz/Enrollments/router.js';
-import QuizzesRoutes from './Kambaz/Quizzes/routes.js';
-import QuizAttemptsRoutes from './Kambaz/QuizAttempts/router.js';
-//Mongos
-import mongoose from 'mongoose';
+import { connectDatabase, createApp, DEFAULT_CONNECTION_STRING } from "./app.js";
 
-import MongoStore from "connect-mongo";
+const connectionString = process.env.DATABASE_CONNECTION_STRING || DEFAULT_CONNECTION_STRING;
+await connectDatabase(connectionString);
 
-const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
-mongoose.connect(CONNECTION_STRING);
-
-
-const app = express();
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-  })
-);
-const sessionOptions = {
-  secret: process.env.SESSION_SECRET || "kambaz",
-  resave: false,
-  saveUninitialized: false,
-
-  // store session in mongoDB
-  store: MongoStore.create({
-    mongoUrl: CONNECTION_STRING,
-    collectionName: "sessions",   // colleciton name: session 
-    ttl: 24 * 60 * 60,           // 1 day expired
-    autoRemove: "native",         // auto clean session
-  }),
-
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-    httpOnly: true,
-  }
-};
-
-if (process.env.SERVER_ENV !== "development") {
-  sessionOptions.proxy = true;
-  sessionOptions.cookie.sameSite = "none"; 
-  sessionOptions.cookie.secure = true;
-  // sessionOptions.cookie = {
-  //   ...sessionOptions.cookie,
-  //   sameSite: "none",
-  //   secure: true,
-  //   domain: process.env.SERVER_URL,
-  // };
-}
-app.use(session(sessionOptions));
-app.use(express.json());
-
-//Kamza
-UserRoutes(app);
-CourseRoutes(app, db);
-ModulesRoutes(app, db);
-AssignmentsRoutes(app, db);
-EnrollmentsRoutes(app, db);
-QuizzesRoutes(app, db);
-QuizAttemptsRoutes(app)
-
-Lab5(app)
-Hello(app)
-app.listen(process.env.PORT || 4001)
+const app = createApp({ connectionString });
+app.listen(process.env.PORT || 4001);
