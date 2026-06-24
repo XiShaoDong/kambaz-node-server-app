@@ -28,7 +28,7 @@ export async function connectDatabase(connectionString = DEFAULT_CONNECTION_STRI
 
 export function createApp({
   connectionString = DEFAULT_CONNECTION_STRING,
-  clientUrl = process.env.CLIENT_URL || "http://localhost:3000",
+  // clientUrl = process.env.CLIENT_URL || "http://localhost:3000",
   sessionSecret = process.env.SESSION_SECRET || "kambaz",
   serverEnv = process.env.SERVER_ENV,
 } = {}) {
