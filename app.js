@@ -34,10 +34,34 @@ export function createApp({
 } = {}) {
   const app = express();
 
+  // app.use(
+  //   cors({
+  //     credentials: true,
+  //     origin: clientUrl,
+  //   })
+  // );
+
+  const allowedOriginPatterns = [
+    /^http:\/\/localhost:3000$/,
+    /^https:\/\/.*\.vercel\.app$/,
+  ];
+
   app.use(
     cors({
       credentials: true,
-      origin: clientUrl,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+
+        const isAllowed = allowedOriginPatterns.some((pattern) =>
+          pattern.test(origin)
+        );
+
+        if (isAllowed) {
+          return callback(null, true);
+        }
+
+        return callback(new Error(`CORS blocked: ${origin}`));
+      },
     })
   );
 
@@ -56,6 +80,7 @@ export function createApp({
       httpOnly: true,
     },
   };
+  
 
   if (serverEnv !== "development") {
     sessionOptions.proxy = true;
