@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - ci-cd
+      - main
   pull_request:
     branches:
-      - ci-cd
+      - main
 
 jobs:
   verify:
